@@ -1,0 +1,69 @@
+{
+  "pages": [
+    {
+      "path": "pages/one/one",
+      "style": {
+        "navigationBarTitleText": "常规"
+      }
+    },
+    {
+      "path": "pages/two/two",
+      "style": {
+        "navigationBarTitleText": "二维"
+      }
+    },
+    {
+      "path": "pages/three/three",
+      "style": {
+        "navigationBarTitleText": "PageScroll"
+      }
+    },
+    {
+      "path": "pages/four/four",
+      "style": {
+        "navigationBarTitleText": "scrollView"
+      }
+    },
+    {
+      "path": "pages/five/five",
+      "style": {
+        "navigationBarTitleText": "虚拟列表"
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#2BDC03",
+    "borderStyle": "white",
+    "backgroundColor": "#F8F8F8",
+    "list": [
+      {
+        "pagePath": "pages/one/one",
+        "text": "常规"
+      },
+      {
+        "pagePath": "pages/two/two",
+        "text": "二维"
+      },
+      {
+        "pagePath": "pages/three/three",
+        "text": "PageScroll"
+      },
+      {
+        "pagePath": "pages/four/four",
+        "text": "scrollView"
+      },
+      {
+        "pagePath": "pages/five/five",
+        "text": "虚拟列表"
+      }
+    ],
+    "position": "bottom"
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  }
+}
