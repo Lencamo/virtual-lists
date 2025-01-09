@@ -5,6 +5,8 @@
       :style="{ height: `${systemHeight}px` }"
       @scroll="handleScroll"
       @scrolltolower="onReachBottomFn"
+      enhanced
+      paging-enabled
     >
       <view :style="{ height: `${totalHeight}px` }">
         <view

@@ -141,7 +141,7 @@ export function useVirtualList(options: {
   // 页面滚动事件
   const handleScroll = throttle((e: any) => {
     scrollTop.value = e.detail.scrollTop
-  }, 50)
+  }, 30)
 
   return {
     systemHeight,
