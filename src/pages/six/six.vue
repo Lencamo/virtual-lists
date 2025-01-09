@@ -16,9 +16,11 @@
           :id="`item${item.pageNum}`"
           :style="{
             transform: `translateY(${item.offset}px)`,
+            height: `${itemHeights[item.pageNum * 5 + (item.idx % 5)]}rpx`,
             backgroundColor: getItemColor(item.idx),
           }"
           class="item-list"
+          :data-index="item.idx"
         >
           <text>{{ item.idx }}</text>
         </view>
@@ -28,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, computed, nextTick, watch } from "vue";
 
 // 数据定义
 const list = ref<any[][]>([]); // 所有数据
@@ -36,7 +38,9 @@ const index = ref(0); // 数据索引
 const currentIndex = ref(0); // 当前页数
 const systemHeight = ref(0); // 屏幕高度
 const scrollTop = ref(0); // 当前滚动位置
-const itemHeight = ref(100); // 每个列表项的预估高度（单位：px）
+const itemHeights = ref<number[]>([]); // 存储每个 item 的实际高度（rpx）
+const itemOffsets = ref<number[]>([]); // 存储每个 item 的偏移量（px）
+const rpxRatio = ref(1); // rpx 与 px 的转换比例
 
 // 定义 10 种颜色
 const colors = [
@@ -59,26 +63,23 @@ const getItemColor = (index: number) => {
 
 // 计算总高度
 const totalHeight = computed(() => {
-  return list.value.length * itemHeight.value * 5; // 每页有 5 个列表项
+  return itemOffsets.value[itemOffsets.value.length - 1] || 0;
 });
 
 // 计算可见区域的内容
 const visibleItems = computed(() => {
-  const startIndex = Math.floor(scrollTop.value / itemHeight.value);
-  const endIndex = Math.min(
-    startIndex + Math.ceil(systemHeight.value / itemHeight.value) + 10, // 多加载一些项以避免空白
-    list.value.length * 5 // 每页有 5 个列表项
-  );
+  const startIndex = findStartIndex(scrollTop.value);
+  const endIndex = findEndIndex(scrollTop.value + systemHeight.value);
 
   const items = [];
-  for (let i = startIndex; i < endIndex; i++) {
+  for (let i = startIndex; i <= endIndex; i++) {
     const pageNum = Math.floor(i / 5); // 计算当前页
     const itemIndex = i % 5; // 计算当前项在页中的索引
     if (list.value[pageNum] && list.value[pageNum][itemIndex]) {
       items.push({
         idx: list.value[pageNum][itemIndex].idx,
         pageNum,
-        offset: i * itemHeight.value, // 动态计算偏移量
+        offset: itemOffsets.value[i] || 0, // 动态计算偏移量
       });
     }
   }
@@ -86,6 +87,36 @@ const visibleItems = computed(() => {
   // console.log("visibleItems的值:", items);
   return items;
 });
+
+// 查找起始索引
+const findStartIndex = (scrollTop: number) => {
+  let low = 0,
+    high = itemOffsets.value.length - 1;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (itemOffsets.value[mid] <= scrollTop) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return high;
+};
+
+// 查找结束索引
+const findEndIndex = (scrollBottom: number) => {
+  let low = 0,
+    high = itemOffsets.value.length - 1;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (itemOffsets.value[mid] <= scrollBottom) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return high;
+};
 
 // 节流函数
 const throttle = (fn: Function, delay: number) => {
@@ -104,6 +135,8 @@ const getSystemInfo = () => {
   uni.getSystemInfo({
     success: (res) => {
       systemHeight.value = res.windowHeight;
+      // 计算 rpx 与 px 的转换比例
+      rpxRatio.value = res.windowWidth / 750;
     },
     fail: (err) => {
       console.error("获取系统信息失败:", err);
@@ -114,44 +147,60 @@ const getSystemInfo = () => {
 // 初始化数据
 const initData = () => {
   const arr = [
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
   ];
   list.value.push(arr);
+
+  // 初始化 itemHeights 和 itemOffsets
+  itemHeights.value = arr.map((item) => item.height);
+  updateItemOffsets();
 };
+
+// 随机生成高度（200-500rpx）
+const getRandomHeight = () => {
+  return Math.floor(Math.random() * 300) + 200; // 200-500rpx
+};
+
+// 更新 item 偏移量
+const updateItemOffsets = () => {
+  let offset = 0;
+  itemOffsets.value = itemHeights.value.map((height) => {
+    const currentOffset = offset;
+    offset += height * rpxRatio.value; // 将 rpx 转换为 px
+    return currentOffset;
+  });
+};
+
+// 监听 itemHeights 的变化
+watch(itemHeights, () => {
+  updateItemOffsets();
+});
 
 // 页面加载
 onMounted(() => {
   initData();
   getSystemInfo();
-  // 动态获取 item 高度
-  nextTick(() => {
-    uni
-      .createSelectorQuery()
-      .select(".item-list")
-      .boundingClientRect((res: any) => {
-        if (res) {
-          itemHeight.value = res.height; // 更新 itemHeight 为实际高度
-        }
-      })
-      .exec();
-  });
 });
 
 // 触底加载更多数据
 const onReachBottomFn = () => {
   currentIndex.value++;
   const arr = [
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
+    { idx: index.value++, height: getRandomHeight() },
   ];
   list.value.push(arr);
+
+  // 扩展 itemHeights 和 itemOffsets
+  itemHeights.value.push(...arr.map((item) => item.height));
+  updateItemOffsets();
 };
 
 // 页面滚动事件
@@ -168,7 +217,6 @@ const handleScroll = throttle((e: any) => {
 
 .item-list {
   text-align: center;
-  height: 500rpx; /* 每个列表项的高度 */
   width: 100vw;
   position: absolute; /* 使用绝对定位实现动态偏移 */
   top: 0;

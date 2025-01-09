@@ -1,33 +1,21 @@
 {
   "pages": [
     {
-      "path": "pages/one/one",
-      "style": {
-        "navigationBarTitleText": "常规"
-      }
-    },
-    {
-      "path": "pages/two/two",
-      "style": {
-        "navigationBarTitleText": "二维"
-      }
-    },
-    {
-      "path": "pages/three/three",
-      "style": {
-        "navigationBarTitleText": "PageScroll"
-      }
-    },
-    {
-      "path": "pages/four/four",
-      "style": {
-        "navigationBarTitleText": "scrollView"
-      }
-    },
-    {
       "path": "pages/five/five",
       "style": {
-        "navigationBarTitleText": "虚拟列表"
+        "navigationBarTitleText": "虚拟列表1"
+      }
+    },
+    {
+      "path": "pages/six/six",
+      "style": {
+        "navigationBarTitleText": "虚拟列表2"
+      }
+    },
+    {
+      "path": "pages/sevent/sevent",
+      "style": {
+        "navigationBarTitleText": "hooks版本"
       }
     }
   ],
@@ -38,24 +26,16 @@
     "backgroundColor": "#F8F8F8",
     "list": [
       {
-        "pagePath": "pages/one/one",
-        "text": "常规"
-      },
-      {
-        "pagePath": "pages/two/two",
-        "text": "二维"
-      },
-      {
-        "pagePath": "pages/three/three",
-        "text": "PageScroll"
-      },
-      {
-        "pagePath": "pages/four/four",
-        "text": "scrollView"
-      },
-      {
         "pagePath": "pages/five/five",
-        "text": "虚拟列表"
+        "text": "虚拟列表1"
+      },
+      {
+        "pagePath": "pages/six/six",
+        "text": "虚拟列表2"
+      },
+      {
+        "pagePath": "pages/sevent/sevent",
+        "text": "hooks版本"
       }
     ],
     "position": "bottom"

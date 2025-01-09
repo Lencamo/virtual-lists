@@ -33,7 +33,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch } from "vue";
-import { onReachBottom } from "@dcloudio/uni-app";
 
 // 数据定义
 const list = ref<any[][]>([]); // 所有数据
