@@ -12,17 +12,14 @@
           :key="item.id"
           :id="`item${item.pageNum}-${item.idx % pageSize}`"
           :style="{
-            transform: `translateY(${item.offset}px)`,
-            height: `${itemHeights[item.idx]}px`,
-            backgroundColor: getItemColor(item.idx)
+            transform: `translateY(${item.offset}px)`
           }"
           class="item-list"
         >
-          <view class="message">
-            <text class="sender">{{ item.sender }}:</text>
-            <text class="content">{{ item.content }}</text>
-            <text class="timestamp">{{ item.timestamp }}</text>
-          </view>
+          <ItemComponent
+            :item="item"
+            @height-change="(height) => updateItemHeight(item.idx, height)"
+          />
         </view>
       </view>
     </scroll-view>
@@ -31,7 +28,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useVirtualList } from '@/hooks/useVirtualList'
+import { useVirtualList } from '@/hooks/useVirtualList2'
+import ItemComponent from '@/components/ItemComponent.vue'
 
 const currentIndex = ref(0)
 const pageSize = 5
@@ -53,34 +51,15 @@ const loadMoreData = async () => {
   })
 }
 
-// 获取 item 高度的函数（外部逻辑）
-const getItemHeight = (item: any) => {
-  // 这里可以根据 item 的内容动态计算高度
-  return Math.floor(Math.random() * 150) + 100
-}
-
-// 获取 item 颜色的函数（外部逻辑）
-const getItemColor = (index: number) => {
-  const colors = [
-    '#FFCCCC',
-    '#FFCC99',
-    '#FFFF99',
-    '#CCFFCC',
-    '#CCFFFF',
-    '#CCCCFF',
-    '#FFCCFF',
-    '#FF9999',
-    '#99CCFF',
-    '#FF9966'
-  ]
-  return colors[index % colors.length]
+// 更新 item 高度
+const updateItemHeight = (index: number, height: number) => {
+  itemHeights.value[index] = height
 }
 
 const { systemHeight, itemHeights, totalHeight, visibleItems, onReachBottomFn, handleScroll } =
   useVirtualList({
     pageSize,
-    loadMoreData,
-    getItemHeight // 传入获取 item 高度的函数
+    loadMoreData
   })
 </script>
 
@@ -96,26 +75,6 @@ const { systemHeight, itemHeights, totalHeight, visibleItems, onReachBottomFn, h
   position: absolute; /* 使用绝对定位实现动态偏移 */
   top: 0;
   left: 0;
-  padding: 10px;
   box-sizing: border-box;
-}
-
-.message {
-  display: flex;
-  flex-direction: column;
-}
-
-.sender {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.content {
-  margin-bottom: 5px;
-}
-
-.timestamp {
-  font-size: 12px;
-  color: #666;
 }
 </style>

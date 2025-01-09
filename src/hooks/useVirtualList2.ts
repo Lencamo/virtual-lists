@@ -1,4 +1,4 @@
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 
 // 工具函数：节流
 const throttle = (fn: Function, delay: number) => {
@@ -15,16 +15,14 @@ const throttle = (fn: Function, delay: number) => {
 export function useVirtualList(options: {
   pageSize?: number
   loadMoreData: () => Promise<any[]> // 加载更多数据的回调函数
-  getItemHeight: (item: any) => number // 外部传入的获取 item 高度的函数
 }) {
-  const { pageSize = 5, loadMoreData, getItemHeight } = options
+  const { pageSize = 5, loadMoreData } = options
 
   const list = ref<any[][]>([]) // 所有数据
   const systemHeight = ref(0) // 屏幕高度（px）
   const scrollTop = ref(0) // 当前滚动位置（px）
   const itemHeights = ref<number[]>([]) // 存储每个 item 的实际高度（px）
   const itemOffsets = ref<number[]>([]) // 存储每个 item 的偏移量（px）
-  const rpxRatio = ref(1) // rpx 与 px 的转换比例
   const isLoading = ref(false) // 是否正在加载数据
 
   // 计算总高度（px）
@@ -33,9 +31,14 @@ export function useVirtualList(options: {
   })
 
   // 计算可见区域的内容
+  // 计算可见区域的内容
   const visibleItems = computed(() => {
-    const startIndex = findStartIndex(scrollTop.value)
-    const endIndex = findEndIndex(scrollTop.value + systemHeight.value)
+    const buffer = 2 // 缓冲区域，上下各多渲染 2 个 item
+    const startIndex = Math.max(0, findStartIndex(scrollTop.value) - buffer) // 增加上方缓冲
+    const endIndex = Math.min(
+      itemOffsets.value.length - 1,
+      findEndIndex(scrollTop.value + systemHeight.value) + buffer // 增加下方缓冲
+    )
 
     const items = []
     for (let i = startIndex; i <= endIndex; i++) {
@@ -59,13 +62,13 @@ export function useVirtualList(options: {
       high = itemOffsets.value.length - 1
     while (low <= high) {
       const mid = Math.floor((low + high) / 2)
-      if (itemOffsets.value[mid] <= scrollTop) {
+      if (itemOffsets.value[mid] < scrollTop) {
         low = mid + 1
       } else {
         high = mid - 1
       }
     }
-    return high
+    return low
   }
 
   // 查找结束索引
@@ -74,13 +77,13 @@ export function useVirtualList(options: {
       high = itemOffsets.value.length - 1
     while (low <= high) {
       const mid = Math.floor((low + high) / 2)
-      if (itemOffsets.value[mid] <= scrollBottom) {
+      if (itemOffsets.value[mid] < scrollBottom) {
         low = mid + 1
       } else {
         high = mid - 1
       }
     }
-    return high
+    return low
   }
 
   // 更新 item 偏移量（px）
@@ -102,7 +105,6 @@ export function useVirtualList(options: {
     uni.getSystemInfo({
       success: (res) => {
         systemHeight.value = res.windowHeight // 屏幕高度（px）
-        rpxRatio.value = res.windowWidth / 750 // 计算 rpx 与 px 的转换比例
       },
       fail: (err) => {
         console.error('获取系统信息失败:', err)
@@ -122,24 +124,7 @@ export function useVirtualList(options: {
         list.value.push(newData)
 
         // 初始化 itemHeights
-        const startIndex = itemHeights.value.length
-        itemHeights.value.push(...newData.map((item) => getItemHeight(item)))
-
-        // 等待 DOM 更新后，动态计算 item 的高度
-        nextTick(() => {
-          newData.forEach((_, index) => {
-            const query = uni.createSelectorQuery()
-            query.select(`#item${list.value.length - 1}-${index}`).boundingClientRect()
-            query.exec((res) => {
-              if (res && res[0]) {
-                const height = res[0].height // 获取实际高度（px）
-                const itemIndex = startIndex + index
-                itemHeights.value[itemIndex] = height
-                updateItemOffsets()
-              }
-            })
-          })
-        })
+        itemHeights.value.push(...new Array(newData.length).fill(0))
       }
     } catch (error) {
       console.error('加载数据失败:', error)

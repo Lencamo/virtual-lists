@@ -1,9 +1,15 @@
 {
   "pages": [
     {
-      "path": "pages/five/five",
+      "path": "pages/ready/index",
       "style": {
-        "navigationBarTitleText": "虚拟列表1"
+        "navigationBarTitleText": "应用版本"
+      }
+    },
+    {
+      "path": "pages/sevent/sevent",
+      "style": {
+        "navigationBarTitleText": "hooks版本"
       }
     },
     {
@@ -13,9 +19,9 @@
       }
     },
     {
-      "path": "pages/sevent/sevent",
+      "path": "pages/five/five",
       "style": {
-        "navigationBarTitleText": "hooks版本"
+        "navigationBarTitleText": "虚拟列表1"
       }
     }
   ],
@@ -26,16 +32,20 @@
     "backgroundColor": "#F8F8F8",
     "list": [
       {
-        "pagePath": "pages/five/five",
-        "text": "虚拟列表1"
+        "pagePath": "pages/ready/index",
+        "text": "应用版本"
+      },
+      {
+        "pagePath": "pages/sevent/sevent",
+        "text": "hooks版本"
       },
       {
         "pagePath": "pages/six/six",
         "text": "虚拟列表2"
       },
       {
-        "pagePath": "pages/sevent/sevent",
-        "text": "hooks版本"
+        "pagePath": "pages/five/five",
+        "text": "虚拟列表1"
       }
     ],
     "position": "bottom"
