@@ -3,16 +3,16 @@
     <scroll-view
       scroll-y
       :style="{ height: `${systemHeight}px` }"
-      @scroll="handleScroll"
+      :scroll-top="scrollTop"
       @scrolltolower="onReachBottomFn"
-      enhanced
-      paging-enabled
+      lower-threshold="50"
+      :scroll-with-animation="true"
+      @scroll="handleScroll"
     >
       <view :style="{ height: `${totalHeight}px` }">
         <view
           v-for="(item, index) in visibleItems"
           :key="item.id"
-          :id="`item${item.pageNum}-${item.idx % pageSize}`"
           :style="{
             transform: `translateY(${item.offset}px)`
           }"
@@ -30,24 +30,22 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useVirtualList } from '@/hooks/useVirtualList2'
+import { useVirtualList } from '@/hooks/useVirtualList3'
 import ItemComponent from '@/components/ItemComponent.vue'
 
-const currentIndex = ref(0)
+const currentPage = ref(0)
 const pageSize = 5
 
 // 模拟数据加载函数
-const loadMoreData = async () => {
+const loadMoreData = async (pageNum: number) => {
   return new Promise<any[]>((resolve) => {
     setTimeout(() => {
       const newData = Array.from({ length: pageSize }, (_, i) => ({
-        id: currentIndex.value * pageSize + i + 1,
-        idx: currentIndex.value * pageSize + i, // 全局唯一索引
-        sender: `User ${currentIndex.value * pageSize + i + 1}`,
-        content: `This is message ${currentIndex.value * pageSize + i + 1}`,
+        id: pageNum * pageSize + i + 1,
+        sender: `User ${pageNum * pageSize + i + 1}`,
+        content: `This is message ${pageNum * pageSize + i + 1}`,
         timestamp: new Date().toLocaleTimeString()
       }))
-      currentIndex.value++ // 更新页数
       resolve(newData)
     }, 1000) // 模拟延迟
   })
@@ -58,11 +56,23 @@ const updateItemHeight = (index: number, height: number) => {
   itemHeights.value[index] = height
 }
 
-const { systemHeight, itemHeights, totalHeight, visibleItems, onReachBottomFn, handleScroll } =
-  useVirtualList({
-    pageSize,
-    loadMoreData
-  })
+const {
+  systemHeight,
+  itemHeights,
+  totalHeight,
+  visibleItems,
+  scrollTop,
+  onReachBottomFn,
+  updateScrollTop
+} = useVirtualList({
+  pageSize,
+  loadMoreData
+})
+
+// 监听滚动事件
+const handleScroll = (e: any) => {
+  updateScrollTop(e.detail.scrollTop)
+}
 </script>
 
 <style scoped>

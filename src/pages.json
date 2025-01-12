@@ -1,15 +1,26 @@
 {
+  "lazyCodeLoading": "requiredComponents",
   "pages": [
     {
-      "path": "pages/ready/index",
+      "path": "pages/skyline/index",
       "style": {
-        "navigationBarTitleText": "应用版本"
+        "navigationBarTitleText": "skyline版本",
+        "enablePullDownRefresh": false,
+        "navigationStyle": "custom",
+        "renderer": "skyline",
+        "componentFramework": "glass-easel"
+      }
+    },
+    {
+      "path": "pages/webView/index",
+      "style": {
+        "navigationBarTitleText": "webView版本"
       }
     },
     {
       "path": "pages/sevent/sevent",
       "style": {
-        "navigationBarTitleText": "hooks版本"
+        "navigationBarTitleText": "hooks封装"
       }
     },
     {
@@ -32,8 +43,12 @@
     "backgroundColor": "#F8F8F8",
     "list": [
       {
-        "pagePath": "pages/ready/index",
-        "text": "应用版本"
+        "pagePath": "pages/skyline/index",
+        "text": "skyline版本"
+      },
+      {
+        "pagePath": "pages/webView/index",
+        "text": "webView版本"
       },
       {
         "pagePath": "pages/sevent/sevent",

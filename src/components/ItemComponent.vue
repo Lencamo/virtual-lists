@@ -3,7 +3,7 @@
     class="item-container"
     :style="{
       height: `${height}px`,
-      width: '100vw',
+      width: '100vw'
     }"
   >
     <image
@@ -21,45 +21,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted } from 'vue'
 
 const props = defineProps({
   item: {
     type: Object,
-    required: true,
-  },
-});
+    required: true
+  }
+})
 
-const height = ref(0); // item 的高度
-const backgroundImageUrl = ref(""); // 背景图片 URL
+const height = ref(0) // item 的高度
+const backgroundImageUrl = ref('') // 背景图片 URL
 
 // 生成随机图片 URL
 const generateRandomImageUrl = (width: number) => {
-  const randomHeight = Math.floor(Math.random() * 200) + 150; // 随机高度
-  return `https://picsum.photos/${width}/${randomHeight}`;
-};
+  const randomHeight = Math.floor(Math.random() * 200) + 150 // 随机高度
+  return `https://picsum.photos/${width}/${randomHeight}`
+}
 
 // 图片加载完成事件
 const handleImageLoad = (event: any) => {
-  const { height: imgHeight } = event.detail;
-  height.value = imgHeight; // 获取图片高度
-  emit("height-change", height.value); // 通知父组件高度变化
-};
+  const { height: imgHeight } = event.detail
+  height.value = imgHeight // 获取图片高度
+  emit('height-change', height.value) // 通知父组件高度变化
+}
 
-const emit = defineEmits(["height-change"]);
+const emit = defineEmits(['height-change'])
 
 // 初始化背景图片 URL
 onMounted(() => {
   uni.getSystemInfo({
     success: (res) => {
-      const screenWidth = res.windowWidth; // 获取屏幕宽度
-      backgroundImageUrl.value = generateRandomImageUrl(screenWidth);
+      const screenWidth = res.windowWidth // 获取屏幕宽度
+      backgroundImageUrl.value = generateRandomImageUrl(screenWidth)
     },
     fail: (err) => {
-      console.error("获取系统信息失败:", err);
-    },
-  });
-});
+      console.error('获取系统信息失败:', err)
+    }
+  })
+})
 </script>
 
 <style scoped>
