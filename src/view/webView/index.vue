@@ -3,18 +3,18 @@
     <scroll-view
       scroll-y
       :style="{ height: `${systemHeight}px` }"
-      :scroll-top="scrollTop"
-      @scrolltolower="onReachBottomFn"
-      lower-threshold="50"
-      :scroll-with-animation="true"
       @scroll="handleScroll"
+      @scrolltolower="onReachBottomFn"
+      enhanced
+      paging-enabled
     >
       <view :style="{ height: `${totalHeight}px` }">
         <view
           v-for="(item, index) in visibleItems"
           :key="item.id"
+          :id="`item${item.pageNum}-${item.idx % pageSize}`"
           :style="{
-            transform: `translateY(${item.offset}px)`
+            transform: `translateY(${item.offset}px)`,
           }"
           class="item-list"
         >
@@ -29,12 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useVirtualList } from '@/hooks/useVirtualList3'
-import ItemComponent from '@/components/ItemComponent.vue'
+import { useVirtualList } from "@/hooks/others/useVirtualList2";
+import ItemComponent from "@/components/ItemComponent.vue";
 
-const currentPage = ref(0)
-const pageSize = 5
+const pageSize = 5;
 
 // 模拟数据加载函数
 const loadMoreData = async (pageNum: number) => {
@@ -44,35 +42,29 @@ const loadMoreData = async (pageNum: number) => {
         id: pageNum * pageSize + i + 1,
         sender: `User ${pageNum * pageSize + i + 1}`,
         content: `This is message ${pageNum * pageSize + i + 1}`,
-        timestamp: new Date().toLocaleTimeString()
-      }))
-      resolve(newData)
-    }, 1000) // 模拟延迟
-  })
-}
+        timestamp: new Date().toLocaleTimeString(),
+      }));
+      resolve(newData);
+    }, 1000); // 模拟延迟
+  });
+};
 
 // 更新 item 高度
 const updateItemHeight = (index: number, height: number) => {
-  itemHeights.value[index] = height
-}
+  itemHeights.value[index] = height;
+};
 
 const {
   systemHeight,
   itemHeights,
   totalHeight,
   visibleItems,
-  scrollTop,
   onReachBottomFn,
-  updateScrollTop
+  handleScroll,
 } = useVirtualList({
   pageSize,
-  loadMoreData
-})
-
-// 监听滚动事件
-const handleScroll = (e: any) => {
-  updateScrollTop(e.detail.scrollTop)
-}
+  loadMoreData,
+});
 </script>
 
 <style scoped>

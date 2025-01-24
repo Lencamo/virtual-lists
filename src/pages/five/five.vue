@@ -28,136 +28,78 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from "vue";
+import { getItemColor, rpxToPx, throttle } from "@/utils/appTools";
+import { ref, computed, nextTick } from "vue";
 
-// 数据定义
-const list = ref<any[][]>([]); // 所有数据
-const index = ref(0); // 数据索引
-const currentIndex = ref(0); // 当前页数
-const systemHeight = ref(0); // 屏幕高度
+const currentIndex = ref(1); // 当前页数
+const dataList = ref<any[][]>([]); // 所有数据
+
+const { windowHeight } = uni.getSystemInfoSync();
+const systemHeight = ref(windowHeight); // 屏幕高度
 const scrollTop = ref(0); // 当前滚动位置
-const itemHeight = ref(100); // 每个列表项的预估高度（单位：px）
+const itemHeight = ref(rpxToPx(500));
 
-// 定义 10 种颜色
-const colors = [
-  "#FFCCCC", // 浅红
-  "#FFCC99", // 浅橙
-  "#FFFF99", // 浅黄
-  "#CCFFCC", // 浅绿
-  "#CCFFFF", // 浅青
-  "#CCCCFF", // 浅蓝
-  "#FFCCFF", // 浅紫
-  "#FF9999", // 粉红
-  "#99CCFF", // 天蓝
-  "#FF9966", // 橙红
-];
-
-// 根据索引获取颜色
-const getItemColor = (index: number) => {
-  return colors[index % colors.length]; // 循环使用颜色
+const index = ref(0); // 数据索引
+const getDataFn = async () => {
+  const arr = [
+    { idx: index.value++ },
+    { idx: index.value++ },
+    { idx: index.value++ },
+    { idx: index.value++ },
+    { idx: index.value++ },
+  ];
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // 模拟延迟
+  dataList.value.push(arr);
 };
+
+getDataFn();
+
+// ======================== 数据更新 ========================
 
 // 计算总高度
 const totalHeight = computed(() => {
-  return list.value.length * itemHeight.value * 5; // 每页有 5 个列表项
+  return dataList.value.length * itemHeight.value * 5;
 });
 
 // 计算可见区域的内容
 const visibleItems = computed(() => {
-  const startIndex = Math.floor(scrollTop.value / itemHeight.value);
+  const startIndex = Math.max(
+    0,
+    Math.floor(scrollTop.value / itemHeight.value) - 5
+  );
   const endIndex = Math.min(
-    startIndex + Math.ceil(systemHeight.value / itemHeight.value) + 10, // 多加载一些项以避免空白
-    list.value.length * 5 // 每页有 5 个列表项
+    startIndex + Math.ceil(systemHeight.value / itemHeight.value) + 10,
+    dataList.value.length * 5
   );
 
   const items = [];
   for (let i = startIndex; i < endIndex; i++) {
-    const pageNum = Math.floor(i / 5); // 计算当前页
-    const itemIndex = i % 5; // 计算当前项在页中的索引
-    if (list.value[pageNum] && list.value[pageNum][itemIndex]) {
+    const pageNum = Math.floor(i / 5);
+    const itemIndex = i % 5;
+    if (dataList.value[pageNum] && dataList.value[pageNum][itemIndex]) {
       items.push({
-        idx: list.value[pageNum][itemIndex].idx,
+        idx: dataList.value[pageNum][itemIndex].idx,
         pageNum,
-        offset: i * itemHeight.value, // 动态计算偏移量
+        offset: i * itemHeight.value,
       });
     }
   }
 
-  // console.log("visibleItems的值:", items);
   return items;
 });
 
-// 节流函数
-const throttle = (fn: Function, delay: number) => {
-  let lastTime = 0;
-  return (...args: any[]) => {
-    const now = Date.now();
-    if (now - lastTime >= delay) {
-      fn(...args); // 直接调用函数，不依赖 this
-      lastTime = now;
-    }
-  };
-};
-
-// 获取系统信息
-const getSystemInfo = () => {
-  uni.getSystemInfo({
-    success: (res) => {
-      systemHeight.value = res.windowHeight;
-    },
-    fail: (err) => {
-      console.error("获取系统信息失败:", err);
-    },
-  });
-};
-
-// 初始化数据
-const initData = () => {
-  const arr = [
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-  ];
-  list.value.push(arr);
-};
-
-// 页面加载
-onMounted(() => {
-  initData();
-  getSystemInfo();
-  // 动态获取 item 高度
-  nextTick(() => {
-    uni
-      .createSelectorQuery()
-      .select(".item-list")
-      .boundingClientRect((res: any) => {
-        if (res) {
-          itemHeight.value = res.height; // 更新 itemHeight 为实际高度
-        }
-      })
-      .exec();
-  });
-});
-
-// 触底加载更多数据
-const onReachBottomFn = () => {
-  currentIndex.value++;
-  const arr = [
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-    { idx: index.value++ },
-  ];
-  list.value.push(arr);
-};
+// ======================== 数据加载 ========================
 
 // 页面滚动事件
 const handleScroll = throttle((e: any) => {
   scrollTop.value = e.detail.scrollTop;
 }, 50);
+
+// 触底加载更多数据
+const onReachBottomFn = () => {
+  currentIndex.value++;
+  getDataFn();
+};
 </script>
 
 <style scoped>
@@ -168,10 +110,12 @@ const handleScroll = throttle((e: any) => {
 
 .item-list {
   text-align: center;
-  height: 500rpx; /* 每个列表项的高度 */
+  height: v-bind("itemHeight + 'px'");
   width: 100vw;
   position: absolute; /* 使用绝对定位实现动态偏移 */
   top: 0;
   left: 0;
+
+  transition: transform 0.2s ease-in-out;
 }
 </style>

@@ -2,37 +2,15 @@
   "lazyCodeLoading": "requiredComponents",
   "pages": [
     {
-      "path": "pages/skyline/index",
-      "style": {
-        "navigationBarTitleText": "skyline版本",
-        "enablePullDownRefresh": false,
-        "navigationStyle": "custom",
-        "renderer": "skyline",
-        "componentFramework": "glass-easel"
-      }
-    },
-    {
-      "path": "pages/webView/index",
-      "style": {
-        "navigationBarTitleText": "webView版本"
-      }
-    },
-    {
-      "path": "pages/sevent/sevent",
-      "style": {
-        "navigationBarTitleText": "hooks封装"
-      }
-    },
-    {
       "path": "pages/six/six",
       "style": {
-        "navigationBarTitleText": "虚拟列表2"
+        "navigationBarTitleText": "动高"
       }
     },
     {
       "path": "pages/five/five",
       "style": {
-        "navigationBarTitleText": "虚拟列表1"
+        "navigationBarTitleText": "定高"
       }
     }
   ],
@@ -40,27 +18,15 @@
     "color": "#999",
     "selectedColor": "#2BDC03",
     "borderStyle": "white",
-    "backgroundColor": "#F8F8F8",
+    "backgroundColor": "#21252b",
     "list": [
       {
-        "pagePath": "pages/skyline/index",
-        "text": "skyline版本"
-      },
-      {
-        "pagePath": "pages/webView/index",
-        "text": "webView版本"
-      },
-      {
-        "pagePath": "pages/sevent/sevent",
-        "text": "hooks版本"
-      },
-      {
         "pagePath": "pages/six/six",
-        "text": "虚拟列表2"
+        "text": "动高"
       },
       {
         "pagePath": "pages/five/five",
-        "text": "虚拟列表1"
+        "text": "定高"
       }
     ],
     "position": "bottom"

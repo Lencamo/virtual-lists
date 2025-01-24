@@ -14,15 +14,11 @@
           :style="{
             transform: `translateY(${item.offset}px)`,
             height: `${itemHeights[item.idx]}px`,
-            backgroundColor: getItemColor(item.idx)
+            backgroundColor: getItemColor(item.idx),
           }"
           class="item-list"
         >
-          <view class="message">
-            <text class="sender">{{ item.sender }}:</text>
-            <text class="content">{{ item.content }}</text>
-            <text class="timestamp">{{ item.timestamp }}</text>
-          </view>
+          <view class="message">{{ item.idx }}</view>
         </view>
       </view>
     </scroll-view>
@@ -30,11 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useVirtualList } from '@/hooks/useVirtualList'
+import { ref } from "vue";
+import { useVirtualList } from "@/hooks/others/useVirtualList";
 
-const currentIndex = ref(0)
-const pageSize = 5
+const currentIndex = ref(0);
+const pageSize = 5;
 
 // 模拟数据加载函数
 const loadMoreData = async () => {
@@ -43,45 +39,48 @@ const loadMoreData = async () => {
       const newData = Array.from({ length: pageSize }, (_, i) => ({
         id: currentIndex.value * pageSize + i + 1,
         idx: currentIndex.value * pageSize + i, // 全局唯一索引
-        sender: `User ${currentIndex.value * pageSize + i + 1}`,
-        content: `This is message ${currentIndex.value * pageSize + i + 1}`,
-        timestamp: new Date().toLocaleTimeString()
-      }))
-      currentIndex.value++ // 更新页数
-      resolve(newData)
-    }, 1000) // 模拟延迟
-  })
-}
+      }));
+      currentIndex.value++; // 更新页数
+      resolve(newData);
+    }, 1000); // 模拟延迟
+  });
+};
 
 // 获取 item 高度的函数（外部逻辑）
 const getItemHeight = (item: any) => {
   // 这里可以根据 item 的内容动态计算高度
-  return Math.floor(Math.random() * 150) + 100
-}
+  return Math.floor(Math.random() * 150) + 100;
+};
 
 // 获取 item 颜色的函数（外部逻辑）
 const getItemColor = (index: number) => {
   const colors = [
-    '#FFCCCC',
-    '#FFCC99',
-    '#FFFF99',
-    '#CCFFCC',
-    '#CCFFFF',
-    '#CCCCFF',
-    '#FFCCFF',
-    '#FF9999',
-    '#99CCFF',
-    '#FF9966'
-  ]
-  return colors[index % colors.length]
-}
+    "#FFCCCC",
+    "#FFCC99",
+    "#FFFF99",
+    "#CCFFCC",
+    "#CCFFFF",
+    "#CCCCFF",
+    "#FFCCFF",
+    "#FF9999",
+    "#99CCFF",
+    "#FF9966",
+  ];
+  return colors[index % colors.length];
+};
 
-const { systemHeight, itemHeights, totalHeight, visibleItems, onReachBottomFn, handleScroll } =
-  useVirtualList({
-    pageSize,
-    loadMoreData,
-    getItemHeight // 传入获取 item 高度的函数
-  })
+const {
+  systemHeight,
+  itemHeights,
+  totalHeight,
+  visibleItems,
+  onReachBottomFn,
+  handleScroll,
+} = useVirtualList({
+  pageSize,
+  loadMoreData,
+  getItemHeight, // 传入获取 item 高度的函数
+});
 </script>
 
 <style scoped>
@@ -103,19 +102,5 @@ const { systemHeight, itemHeights, totalHeight, visibleItems, onReachBottomFn, h
 .message {
   display: flex;
   flex-direction: column;
-}
-
-.sender {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.content {
-  margin-bottom: 5px;
-}
-
-.timestamp {
-  font-size: 12px;
-  color: #666;
 }
 </style>
